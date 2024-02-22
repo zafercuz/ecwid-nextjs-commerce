@@ -9,8 +9,13 @@ module.exports = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'cdn.shopify.com',
-        pathname: '/s/files/**'
+        hostname: 'd2j6dbq0eux0bg-cdn.ecwid.net',
+        pathname: '/images/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'd2j6dbq0eux0bg.cloudfront.net',
+        pathname: '/images/**'
       }
     ]
   },

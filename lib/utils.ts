@@ -11,7 +11,7 @@ export const ensureStartsWith = (stringToCheck: string, startsWith: string) =>
   stringToCheck.startsWith(startsWith) ? stringToCheck : `${startsWith}${stringToCheck}`;
 
 export const validateEnvironmentVariables = () => {
-  const requiredEnvironmentVariables = ['SHOPIFY_STORE_DOMAIN', 'SHOPIFY_STOREFRONT_ACCESS_TOKEN'];
+  const requiredEnvironmentVariables = ['ECWID_STORE_ID', 'ECWID_API_KEY'];
   const missingEnvironmentVariables = [] as string[];
 
   requiredEnvironmentVariables.forEach((envVar) => {
@@ -27,13 +27,14 @@ export const validateEnvironmentVariables = () => {
       )}\n`
     );
   }
+};
 
-  if (
-    process.env.SHOPIFY_STORE_DOMAIN?.includes('[') ||
-    process.env.SHOPIFY_STORE_DOMAIN?.includes(']')
-  ) {
-    throw new Error(
-      'Your `SHOPIFY_STORE_DOMAIN` environment variable includes brackets (ie. `[` and / or `]`). Your site will not work with them there. Please remove them.'
-    );
-  }
+export const cartesianProduct = <T>(...allEntries: T[][]): T[][] => {
+  return allEntries.reduce<T[][]>(
+    (results, entries) =>
+      results
+        .map((result) => entries.map((entry) => result.concat([entry])))
+        .reduce((subResults, result) => subResults.concat(result), []),
+    [[]]
+  );
 };

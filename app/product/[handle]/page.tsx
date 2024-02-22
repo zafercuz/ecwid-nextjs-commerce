@@ -7,8 +7,8 @@ import Footer from 'components/layout/footer';
 import { Gallery } from 'components/product/gallery';
 import { ProductDescription } from 'components/product/product-description';
 import { HIDDEN_PRODUCT_TAG } from 'lib/constants';
-import { getProduct, getProductRecommendations } from 'lib/shopify';
-import { Image } from 'lib/shopify/types';
+import { getProduct, getProductRecommendations } from 'lib/ecwid';
+import { Image } from 'lib/ecwid/types';
 import Link from 'next/link';
 
 export const runtime = 'edge';
@@ -61,7 +61,7 @@ export default async function ProductPage({ params }: { params: { handle: string
     '@type': 'Product',
     name: product.title,
     description: product.description,
-    image: product.featuredImage.url,
+    image: product.featuredImage?.url,
     offers: {
       '@type': 'AggregateOffer',
       availability: product.availableForSale
@@ -87,7 +87,7 @@ export default async function ProductPage({ params }: { params: { handle: string
             <Gallery
               images={product.images.map((image: Image) => ({
                 src: image.url,
-                altText: image.altText
+                altText: image.altText || ''
               }))}
             />
           </div>
