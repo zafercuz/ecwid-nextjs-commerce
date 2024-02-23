@@ -397,14 +397,19 @@ const reshapeProduct = (
 
     if (variants.length > 0 && variantsCombinations.length > 0) {
         variants.forEach((variant) => {
-            let key: string = variant.options.map(({ name, value }) => `${name}:${value}`).join('|');
+            let keys: string[] = variant.options.map(({ name, value }) => `${name}:${value}`);//.join('|');
 
             variantsCombinations.map((combination) => {
-                if (combination.id.indexOf(key) >= 0) {
+                if (!keys.find(x => combination.id.indexOf(x) == -1)) {
+
                     combination.availableForSale = variant.inStock;
                     combination.price = variant.price ? variant.price : productPrice;
-                    if (variant.price > maxPrice) maxPrice = variant.price;
-                    if (variant.price < minPrice) minPrice = variant.price;
+
+                    if (combination.availableForSale) {
+                        if (variant.price > maxPrice) maxPrice = variant.price;
+                        if (variant.price < minPrice) minPrice = variant.price;
+                    }
+
                 }
             });
         });
@@ -413,72 +418,6 @@ const reshapeProduct = (
     if (variantsCombinations.length > 0) {
         product.variants = variantsCombinations;
     }
-
-    /*
-        if (variants.length > 0) {
-        let productVariants = <ProductVariant[]>[];
-    
-            variants.forEach((itm) => {
-                var variantPrice = itm.price;
-                if (!variantPrice) {
-                    // If there is no variant price, assume it's the base product price
-                    variantPrice = productPrice;
-                }
-    
-                var variantAvailable = itm.inStock;
-    
-                minPrice = minPrice == 0 ? variantPrice : Math.min(minPrice, variantPrice);
-                maxPrice = maxPrice == 0 ? variantPrice : Math.max(minPrice, variantPrice);
-    
-                product.availableForSale = variantAvailable || product.availableForSale;
-    
-                let selectedOptions = itm.options.map((opt) => ({
-                    name: opt.name,
-                    value: opt.value
-                }));
-    
-                selectedOptions.map((opt) => {
-                    let missingOptions = product.options.filter(({ name }) => name != opt.name);
-    
-                    missingOptions.map(({ name, values }) => {
-                        values.map((val) => {
-                            // selectedOptions.push({
-                            //     name: name,
-                            //     value: val
-                            // });
-                            productVariants.push(<ProductVariant>{
-                                id: node.id + ':' + itm.id,
-                                title: node.name + ' ' + itm.sku,
-                                availableForSale: node.inStock,
-                                selectedOptions: [{ name: name, value: val }, ...selectedOptions],
-                                price: variantPrice
-                            });
-                        });
-                    });
-                });
-    
-                // selectedOptions.map((opt) => {
-                //     let missingOptions = product.options.filter(({ name }) => name != opt.name);
-    
-                //     missingOptions.map(({ name, values }) => {
-                //         values.map((val) => {
-                //             selectedOptions.push({
-                //                 name: name,
-                //                 value: val
-                //             });
-                //         });
-                //     });
-                // });
-    
-                // productVariants.push(<ProductVariant>{
-                //     id: node.id + ':' + itm.id,
-                //     title: node.name + ' ' + itm.sku,
-                //     availableForSale: variantAvailable,
-                //     selectedOptions: selectedOptions,
-                //     price: variantPrice
-                // });
-            });
-        }*/
 
     product.images = [] as EcwidMedia[];
 
