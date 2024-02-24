@@ -9,41 +9,42 @@ export const runtime = 'edge';
 export const revalidate = 43200; // 12 hours in seconds
 
 export async function generateMetadata({
-  params
+    params
 }: {
-  params: { page: string };
+    params: { page: string };
 }): Promise<Metadata> {
-  return {
-    title: 'Checkout',
-    description: ''
-  };
+    return {
+        title: 'Checkout',
+        description: ''
+    };
 }
 
 export default async function Page({ params }: { params: { page: string } }) {
-  const store_id = process.env.ECWID_STORE_ID!;
-  const body = '<div id="ecStoreProductBrowser"></div>';
+    const store_id = process.env.ECWID_STORE_ID!;
+    const body = '<div id="ecStoreProductBrowser"></div>';
 
-  let cartId = cookies().get('cartId')?.value;
+    let cartId = cookies().get('cartId')?.value;
 
-  return (
-    <>
-      <h1 className="mb-8 text-5xl font-bold">Checkout</h1>
-      <Prose className="mb-8" html={body as string} />
-      <Script id="ecStoreProductBrowser-script">
-        {`let checkout = {
+    return (
+        <>
+            <h1 className="mb-8 text-5xl font-bold">Checkout</h1>
+            <Prose className="mb-8" html={body as string} />
+            <Script id="ecStoreProductBrowser-script">
+                {`let checkout = {
                     id: '` +
-          cartId +
-          `',
+                    cartId +
+                    `',
                     itemsCount: 0
                 }
                 localStorage.setItem('ec-` +
-          store_id +
-          `-checkout', JSON.stringify(checkout));
+                    store_id +
+                    `-checkout', JSON.stringify(checkout));
 
                 let ecwidLoaded = false;
 
                 function load_ecwid() {
                     if (typeof Ecwid != 'undefined') {
+
                         Ecwid.OnAPILoaded.add(function () {
                             if (!ecwidLoaded) {
                                 ecwidLoaded = true;
@@ -58,7 +59,7 @@ export default async function Page({ params }: { params: { page: string } }) {
                         })
         
                         Ecwid.OnPageSwitch.add(function (page) {
-                            console.log(page)
+
                             let is_cart_page = page.type == 'CART';
                             let is_download_error_page = page.type == 'DOWNLOAD_ERROR';
                             let is_checkout_page = page.type.indexOf('CHECKOUT_') >= 0;
@@ -70,17 +71,12 @@ export default async function Page({ params }: { params: { page: string } }) {
 
                             if (page.type == 'CATEGORY') {
                                 location.href = '/';
-                                return false;
-                            }
-
-                            if (page.type == 'PRODUCT') {
-                                console.log('xxx');
-                                return false;
+                                return true;
                             }
 
                             if (!is_cart_page && !is_download_error_page && !is_checkout_page && !is_order_page) {
                                 Ecwid.openPage('cart');
-                                return false;
+                                return true;
                             }
                         });
                     }
@@ -103,15 +99,15 @@ export default async function Page({ params }: { params: { page: string } }) {
                     var script = document.createElement('script');
                     script.type = 'text/javascript';
                     script.src = 'https://app.ecwid.com/script.js?` +
-          store_id +
-          `&data_platform=nextjs_commerce&storefront-v3=true';
+                    store_id +
+                    `&data_platform=nextjs_commerce&storefront-v3=true';
                     script.id = 'ecwid-script'
                     script.onload = load_ecwid
                     document.body.appendChild(script);
                 } else {
                     load_ecwid()
                 }`}
-      </Script>
-    </>
-  );
+            </Script>
+        </>
+    );
 }
