@@ -2,7 +2,7 @@
 
 import clsx from 'clsx';
 import Price from 'components/price';
-import { Product, ProductOption, ProductVariant } from 'lib/ecwid/types';
+import { ProductOption, ProductVariant } from 'lib/ecwid/types';
 import { createUrl } from 'lib/utils';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -13,31 +13,37 @@ type Combination = {
 };
 
 export function VariantPrice({
-    product
+    options,
+    variants,
+    amount,
+    currencyCode
 }: {
-    product: Product;
+    options: ProductOption[];
+    variants: ProductVariant[];
+    amount: string;
+    currencyCode: string;
 }) {
     const searchParams = useSearchParams();
     const hasNoOptionsOrJustOneOption =
-        !product.options.length || (product.options.length === 1 && product.options[0]?.values.length === 1);
-
-    let amount = product.priceRange.maxVariantPrice.amount;
+        !options.length || (options.length === 1 && options[0]?.values.length === 1);
 
     if (!hasNoOptionsOrJustOneOption) {
-        const variant = product.variants.find((variant: ProductVariant) =>
+        const variant = variants.find((variant: ProductVariant) =>
             variant.selectedOptions.every(
                 (option) => option.value === searchParams.get(option.name.toLowerCase())
             )
         );
 
-        amount = `${variant?.price}`;
+        if (variant) {
+            amount = `${variant?.price}`;
+        }
     }
 
     return (
         <>
             <Price
                 amount={amount}
-                currencyCode={product.priceRange.maxVariantPrice.currencyCode}
+                currencyCode={currencyCode}
             />
         </>
     );
