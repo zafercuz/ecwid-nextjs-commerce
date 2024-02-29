@@ -21,7 +21,7 @@ export async function generateMetadata({
 
 export default async function Page({ params }: { params: { page: string } }) {
     const store_id = process.env.ECWID_STORE_ID!;
-    const body = '<div id="ecStoreProductBrowser"></div>';
+    const body = '<div id="ecStoreProductBrowser">Loading checkout...</div>';
 
     let cartId = cookies().get('cartId')?.value;
 
