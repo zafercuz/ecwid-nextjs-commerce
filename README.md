@@ -15,7 +15,7 @@ A Next.js 14 and App Router-ready ecommerce template featuring:
 - Checkout and payments with Ecwid
 - Automatic light/dark mode based on system settings
 
-<h3 id="v1-note"></h3>
+<h3 id="subscription-note"></h3>
 
 > Note: [Contact us](https://ecommerce-store.typeform.com/to/pZ5PYgNF?utm_source=github-commerce) if you’re a developer and need a premium Ecwid subscription for testing purposes.
 
