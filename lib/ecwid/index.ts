@@ -31,7 +31,8 @@ import {
     DEFAULT_OPTION,
     ECWID_API_URL,
     ECWID_STOREFRONT_API_URL,
-    TAGS
+    TAGS,
+    defaultImage
 } from 'lib/constants';
 
 import { cartesianProduct } from 'lib/utils';
@@ -430,6 +431,10 @@ const reshapeProduct = (
     product.featuredImage = node.originalImage as EcwidMedia;
 
     if (product.featuredImage) product.images.unshift(product.featuredImage);
+
+    if (!product.featuredImage) {
+        product.featuredImage = defaultImage;
+    }
 
     product.priceRange = {
         minVariantPrice: { amount: minPrice.toString(), currencyCode: currencyCode },
