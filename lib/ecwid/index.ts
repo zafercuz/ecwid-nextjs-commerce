@@ -9,7 +9,6 @@ import {
     EcwidCartItem,
     EcwidCheckout,
     EcwidCurrencyNode,
-    EcwidLatestStatsNode,
     EcwidMedia,
     EcwidNode,
     EcwidOrder,
@@ -37,7 +36,7 @@ import {
 
 import { cartesianProduct } from 'lib/utils';
 import { revalidateTag } from 'next/cache';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 const store_id = process.env.ECWID_STORE_ID!;
@@ -863,35 +862,36 @@ export async function getProductRecommendations(productId: string): Promise<Prod
 export async function revalidate(req: NextRequest): Promise<NextResponse> {
     // We always need to respond with a 200 status code to Ecwid,
     // otherwise it will continue to retry the request.
+    const collectionWebhooks = ['category.created', 'category.deleted', 'category.updated'];
+    const productWebhooks = ['product.created', 'product.deleted', 'product.updated'];
+    const profileWebhooks = ['profile.updated'];
+    const { eventType } = await req.json();
+    const secret = headers().get('X-Ecwid-Revalidation-Secret') || 'unknown';
 
-    const productsUpdated = cookies().get(`products-updated`)?.value;
-    const categoriesUpdated = cookies().get(`categories-updated`)?.value;
-    const profileUpdated = cookies().get(`profile-updated`)?.value;
+    const isCollectionUpdate = collectionWebhooks.includes(eventType);
+    const isProductUpdate = productWebhooks.includes(eventType);
+    const isProfileUpdate = profileWebhooks.includes(eventType);
 
-    const res = await ecwidFetch<EcwidLatestStatsNode>({
-        method: 'GET',
-        path: `/latest-stats`,
-        cache: 'no-store'
-    });
+    if (!secret || secret !== process.env.ECWID_REVALIDATION_SECRET) {
+        console.error('Invalid revalidation secret.');
+        return NextResponse.json({ status: 200 });
+    }
 
-    if (!res.body) {
+    if (!isCollectionUpdate && !isProductUpdate && !isProfileUpdate) {
         // We don't need to revalidate anything for any other topics.
         return NextResponse.json({ status: 200 });
     }
 
-    if (productsUpdated != res.body.productsUpdated) {
+    if (isProductUpdate) {
         revalidateTag(TAGS.products);
-        cookies().set(`products-updated`, res.body.productsUpdated);
     }
 
-    if (categoriesUpdated != res.body.categoriesUpdated) {
+    if (isCollectionUpdate) {
         revalidateTag(TAGS.collections);
-        cookies().set(`categories-updated`, res.body.categoriesUpdated);
     }
 
-    if (profileUpdated != res.body.profileUpdated) {
+    if (isProfileUpdate) {
         revalidateTag(TAGS.profile);
-        cookies().set(`profile-updated`, res.body.profileUpdated);
     }
 
     return NextResponse.json({ status: 200, revalidated: true, now: Date.now() });
