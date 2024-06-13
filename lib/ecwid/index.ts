@@ -725,7 +725,7 @@ export async function getCollections(): Promise<Collection[]> {
 }
 
 export async function getCollection(handle: string): Promise<Collection | undefined> {
-    let categoryId = handle.replace(/^.*?\-c/g, '');
+    let categoryId = handle.replace(/.*(?<=-c)/, '');
 
     const res = await ecwidFetch<EcwidNode>({
         method: 'GET',
@@ -751,7 +751,7 @@ export async function getCollectionProducts({
         baseUrl: '/'
     };
 
-    let categoryId = collection.replace(/^.*?\-c/g, '');
+    let categoryId = collection.replace(/.*(?<=-c)/, '');
 
     if (collection != 'hidden-homepage-carousel' && collection != 'hidden-homepage-featured-items') {
         query.categories = `${categoryId}`;
@@ -805,7 +805,7 @@ export async function getProducts({
 }
 
 export async function getProduct(handle: string): Promise<Product | undefined> {
-    let productId = handle.replace(/^.*?\-p/g, '');
+    let productId = handle.replace(/.*(?<=-p)/, '');
 
     const res = await ecwidFetch<EcwidNode>({
         method: 'GET',
