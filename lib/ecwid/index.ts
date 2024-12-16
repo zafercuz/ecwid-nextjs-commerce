@@ -224,10 +224,13 @@ const reshapeOrderLine = (orderLine: EcwidCartItem): CartItem => {
     var productId = orderLine.identifier.productId.toString();
 
     var selectedOptions = orderLine.identifier?.selectedOptions
-        ? Object.entries(orderLine.identifier?.selectedOptions).map((opt: any) => ({
-            name: opt[0],
-            value: opt[1].choice
-        }))
+        ? Object.entries(orderLine.identifier?.selectedOptions).map((opt: any) => {
+            return {
+                name: opt[0],
+                value: opt[1].choice,
+                type: opt[1].type,
+            }
+        })
         : [];
 
     if (selectedOptions.length > 0) {
@@ -372,7 +375,8 @@ const reshapeProduct = (
         product.options = options.map((attr) => ({
             id: attr.name,
             name: attr.name,
-            values: attr.choices.map((val) => val.text)
+            values: attr.choices.map((val) => val.text),
+            type: attr.type,
         }));
 
         // api doesn't return all options combinations, so we shuffle that handly
@@ -497,17 +501,27 @@ export async function addToCart(
     var line = lines[0];
     var idParts = line!.merchandiseId.split('|');
 
-    const productId = idParts[0];
+    const productId = idParts[0] || '';
     const sessionToken = cookies().get(`ec-${store_id}-session`)?.value;
 
     const selectedOptions = {} as any;
 
-    if (idParts.length > 1) {
+    // Fetch the product using the product id
+    const product = await getProduct(productId);
+
+    if (idParts.length > 1 && product) {
         idParts.shift();
 
         idParts.map((part) => {
             const option = part.split(':');
-            selectedOptions[`${option[0]}`] = { type: 'DROPDOWN', choice: `${option[1]}` };
+
+            // Find the 'type' in the option in the product options
+            const optionInProduct = product.options.find((optionInProduct) => optionInProduct.name === option[0]);
+
+            if (optionInProduct?.type) {
+                // selectedOptions[`${option[0]}`] = { type: optionInProduct.type, choice: `${option[1]}` }; // For some reason this does not work especially on products that have multiple options??
+                selectedOptions[`${option[0]}`] = { type: 'DROPDOWN', choice: `${option[1]}` };
+            }
         });
     }
 
@@ -544,19 +558,28 @@ export async function removeFromCart(cartId: string, lineIds: string[]): Promise
     // items can be removed at once.
     const line = lineIds[0];
     const idParts = line!.split('|');
-    const productId = idParts[0];
+    const productId = idParts[0] || '';
 
     const sessionToken = cookies().get(`ec-${store_id}-session`)?.value;
 
     let selectedOptions = {} as any | undefined;
 
-    if (idParts.length > 1) {
+    // Fetch the product using the product id
+    const product = await getProduct(productId);
+
+    if (idParts.length > 1 && product) {
         idParts.shift();
 
         idParts.map((part) => {
             const option = part.split(':');
-            console.log('option', option);
-            selectedOptions[`${option[0]}`] = { type: 'DROPDOWN', choice: `${option[1]}` };
+
+            // Find the 'type' in the option in the product options
+            const optionInProduct = product.options.find((optionInProduct) => optionInProduct.name === option[0]);
+
+            if (optionInProduct?.type) {
+                // Does not work when the product has multiple options, only works if product has a single option for now.
+                selectedOptions[`${option[0]}`] = { type: optionInProduct.type, choice: `${option[1]}` };
+            }
         });
     } else {
         selectedOptions = undefined;
@@ -580,9 +603,7 @@ export async function removeFromCart(cartId: string, lineIds: string[]): Promise
         }
     });
 
-    console.log('res', res.body)
     const reshapedOrder = reshapeOrder(res.body.checkout);
-    console.log('reshapedOrder', reshapedOrder)
 
     return reshapedOrder;
 }
