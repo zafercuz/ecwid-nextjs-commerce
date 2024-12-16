@@ -4,6 +4,7 @@ module.exports = {
     // Disabling on production builds because we're running checks on PRs via GitHub Actions.
     ignoreDuringBuilds: true
   },
+  // https://d2j6dbq0eux0bg.cloudfront.net/
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
@@ -15,7 +16,7 @@ module.exports = {
       {
         protocol: 'https',
         hostname: 'd2j6dbq0eux0bg.cloudfront.net',
-        pathname: '/images/**'
+        pathname: '/**'
       }
     ]
   },
