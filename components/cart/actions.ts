@@ -2,6 +2,7 @@
 
 import { TAGS } from 'lib/constants';
 import { addToCart, createCart, getCart, removeFromCart, updateCart } from 'lib/ecwid';
+import { CartItem } from 'lib/ecwid/types';
 import { revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 
@@ -31,7 +32,14 @@ export async function addItem(prevState: any, selectedVariantId: string | undefi
   }
 }
 
-export async function removeItem(prevState: any, lineId: string) {
+export async function removeItem(
+  prevState: any,
+  payload: {
+    lineId: string;
+    selectedOptions: Pick<CartItem, 'merchandise'>['merchandise']['selectedOptions'];
+  }
+) {
+  console.log('payload', payload);
   const cartId = cookies().get('cartId')?.value;
 
   if (!cartId) {
@@ -39,7 +47,10 @@ export async function removeItem(prevState: any, lineId: string) {
   }
 
   try {
-    await removeFromCart(cartId, [lineId]);
+    await removeFromCart(cartId, {
+      lineIds: [payload.lineId],
+      merchandiseSelectedOptions: payload.selectedOptions
+    });
     revalidateTag(TAGS.cart);
   } catch (e) {
     return 'Error removing item from cart';
@@ -52,6 +63,7 @@ export async function updateItemQuantity(
     lineId: string;
     variantId: string;
     quantity: number;
+    selectedOptions: Pick<CartItem, 'merchandise'>['merchandise']['selectedOptions'];
   }
 ) {
   const cartId = cookies().get('cartId')?.value;
@@ -60,11 +72,14 @@ export async function updateItemQuantity(
     return 'Missing cart ID';
   }
 
-  const { lineId, variantId, quantity } = payload;
+  const { lineId, variantId, quantity, selectedOptions } = payload;
 
   try {
     if (quantity === 0) {
-      await removeFromCart(cartId, [lineId]);
+      await removeFromCart(cartId, {
+        lineIds: [payload.lineId],
+        merchandiseSelectedOptions: payload.selectedOptions
+      });
       revalidateTag(TAGS.cart);
       return;
     }
@@ -73,7 +88,8 @@ export async function updateItemQuantity(
       {
         id: lineId,
         merchandiseId: variantId,
-        quantity
+        quantity,
+        merchandiseSelectedOptions: selectedOptions
       }
     ]);
     revalidateTag(TAGS.cart);

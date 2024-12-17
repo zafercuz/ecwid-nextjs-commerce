@@ -25,6 +25,7 @@ export type CartItem = {
     selectedOptions: {
       name: string;
       value: string;
+      type: string;
     }[];
     product: Product;
   };

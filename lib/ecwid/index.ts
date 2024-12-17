@@ -506,22 +506,14 @@ export async function addToCart(
 
     const selectedOptions = {} as any;
 
-    // Fetch the product using the product id
-    const product = await getProduct(productId);
-
-    if (idParts.length > 1 && product) {
+    if (idParts.length > 1) {
         idParts.shift();
 
         idParts.map((part) => {
             const option = part.split(':');
 
-            // Find the 'type' in the option in the product options
-            const optionInProduct = product.options.find((optionInProduct) => optionInProduct.name === option[0]);
-
-            if (optionInProduct?.type) {
-                // selectedOptions[`${option[0]}`] = { type: optionInProduct.type, choice: `${option[1]}` }; // For some reason this does not work especially on products that have multiple options??
-                selectedOptions[`${option[0]}`] = { type: 'DROPDOWN', choice: `${option[1]}` };
-            }
+            // TODO: Check if need to also change the "type" here
+            selectedOptions[`${option[0]}`] = { type: 'DROPDOWN', choice: `${option[1]}` };
         });
     }
 
@@ -551,11 +543,19 @@ export async function addToCart(
     return reshapeOrder(res.body.checkout);
 }
 
-export async function removeFromCart(cartId: string, lineIds: string[]): Promise<Cart> {
+export async function removeFromCart(
+    cartId: string, 
+    payload: { 
+        lineIds: string[]; 
+        merchandiseSelectedOptions: Pick<CartItem, 'merchandise'>['merchandise']['selectedOptions']; 
+    }
+): Promise<Cart> {
     // We assume there is only one item to be removed at a time
     // which looking at the code is the case. May need to keep
     // track to see if it ever gets implemented that multiple
     // items can be removed at once.
+    const { lineIds, merchandiseSelectedOptions } = payload;
+
     const line = lineIds[0];
     const idParts = line!.split('|');
     const productId = idParts[0] || '';
@@ -564,17 +564,14 @@ export async function removeFromCart(cartId: string, lineIds: string[]): Promise
 
     let selectedOptions = {} as any | undefined;
 
-    // Fetch the product using the product id
-    const product = await getProduct(productId);
-
-    if (idParts.length > 1 && product) {
+    if (idParts.length > 1) {
         idParts.shift();
 
         idParts.map((part) => {
             const option = part.split(':');
 
             // Find the 'type' in the option in the product options
-            const optionInProduct = product.options.find((optionInProduct) => optionInProduct.name === option[0]);
+            const optionInProduct = merchandiseSelectedOptions.find((optionInProduct) => optionInProduct.name === option[0]);
 
             if (optionInProduct?.type) {
                 // Does not work when the product has multiple options, only works if product has a single option for now.
@@ -610,7 +607,12 @@ export async function removeFromCart(cartId: string, lineIds: string[]): Promise
 
 export async function updateCart(
     cartId: string,
-    lines: { id: string; merchandiseId: string; quantity: number }[]
+    lines: { 
+        id: string; 
+        merchandiseId: string; 
+        quantity: number; 
+        merchandiseSelectedOptions: Pick<CartItem, 'merchandise'>['merchandise']['selectedOptions']; 
+    }[]
 ): Promise<Cart> {
     const sessionToken = cookies().get(`ec-${store_id}-session`)?.value;
 
@@ -618,7 +620,10 @@ export async function updateCart(
     var idParts = line!.merchandiseId.split('|');
     const productId = idParts[0];
 
-    await removeFromCart(cartId, [line!.merchandiseId]);
+    await removeFromCart(cartId, {
+        lineIds: [line!.merchandiseId],
+        merchandiseSelectedOptions: line?.merchandiseSelectedOptions || []
+    });
 
     const selectedOptions = {} as any;
 
@@ -627,6 +632,8 @@ export async function updateCart(
 
         idParts.map((part) => {
             const option = part.split(':');
+
+            // TODO: Check if need to also change the "type" here
             selectedOptions[`${option[0]}`] = { type: 'DROPDOWN', choice: `${option[1]}` };
         });
     }
@@ -683,8 +690,6 @@ export async function getCart(cartId: string): Promise<Cart | undefined> {
     }
 
     const reshapedOrder = reshapeOrder(res.body.checkout);
-
-    // console.log('getcart reshapedOrder', reshapedOrder);
 
     return reshapedOrder;
 }

@@ -37,7 +37,10 @@ function SubmitButton() {
 export function DeleteItemButton({ item }: { item: CartItem }) {
   const [message, formAction] = useFormState(removeItem, null);
   const itemId = item.id;
-  const actionWithVariant = formAction.bind(null, itemId);
+  const actionWithVariant = formAction.bind(null, {
+    lineId: itemId,
+    selectedOptions: item.merchandise.selectedOptions
+  });
 
   return (
     <form action={actionWithVariant}>

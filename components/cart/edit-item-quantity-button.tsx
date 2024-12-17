@@ -42,7 +42,8 @@ export function EditItemQuantityButton({ item, type }: { item: CartItem; type: '
   const payload = {
     lineId: item.id,
     variantId: item.merchandise.id,
-    quantity: type === 'plus' ? item.quantity + 1 : item.quantity - 1
+    quantity: type === 'plus' ? item.quantity + 1 : item.quantity - 1,
+    selectedOptions: item.merchandise.selectedOptions,
   };
   const actionWithVariant = formAction.bind(null, payload);
 
