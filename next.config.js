@@ -28,5 +28,10 @@ module.exports = {
         permanent: true
       }
     ];
-  }
+  },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
 };

@@ -1,37 +1,37 @@
 import { isEcwidError } from 'lib/type-guards';
 
 import {
-    Cart,
-    CartItem,
-    Collection,
-    EcwidAdjustedPrice,
-    EcwidCart,
-    EcwidCartItem,
-    EcwidCheckout,
-    EcwidCurrencyNode,
-    EcwidMedia,
-    EcwidNode,
-    EcwidOrder,
-    EcwidPagedResult,
-    EcwidPrice,
-    EcwidProductOption,
-    EcwidRelatedProducts,
-    EcwidVariation,
-    Image,
-    Menu,
-    Money,
-    Product,
-    ProductOption,
-    ProductVariant
+  Cart,
+  CartItem,
+  Collection,
+  EcwidAdjustedPrice,
+  EcwidCart,
+  EcwidCartItem,
+  EcwidCheckout,
+  EcwidCurrencyNode,
+  EcwidMedia,
+  EcwidNode,
+  EcwidOrder,
+  EcwidPagedResult,
+  EcwidPrice,
+  EcwidProductOption,
+  EcwidRelatedProducts,
+  EcwidVariation,
+  Image,
+  Menu,
+  Money,
+  Product,
+  ProductOption,
+  ProductVariant
 } from './types';
 
 import {
-    DEFAULT_CURRENCY_CODE,
-    DEFAULT_OPTION,
-    ECWID_API_URL,
-    ECWID_STOREFRONT_API_URL,
-    TAGS,
-    defaultImage
+  DEFAULT_CURRENCY_CODE,
+  DEFAULT_OPTION,
+  ECWID_API_URL,
+  ECWID_STOREFRONT_API_URL,
+  TAGS,
+  defaultImage
 } from 'lib/constants';
 
 import { cartesianProduct } from 'lib/utils';
@@ -297,6 +297,16 @@ const reshapeCollection = (node: EcwidNode): Collection | undefined => {
         return undefined;
     }
 
+    // Ensure the node URL ends with "-c[id]"
+    // For some reason, tourismus damp store does not automatically append the "-c[id]" on the node.url value
+    const idSuffix = `-c${node.id}`;
+    let url = node.url;
+
+    // Check if the URL already contains the "-c[id]" suffix
+    if (!url.endsWith(idSuffix)) {
+      url += idSuffix;
+    }
+
     const metaTitle = node.seoTitle?.toString() || node.name;
     const metaDescription = node.seoDescription?.toString() || node.description;
 
@@ -308,7 +318,7 @@ const reshapeCollection = (node: EcwidNode): Collection | undefined => {
             title: metaTitle,
             description: metaDescription
         },
-        path: `${node.url}`,
+        path: url,
         updatedAt: ''
     };
 };
@@ -325,7 +335,17 @@ const reshapeProduct = (
         return undefined;
     }
 
-    const nodeHandle = encodeURIComponent(node.url.replace(/^\/+|\/+$/g, ''));
+    // Ensure the node URL ends with "-p[id]"
+  // For some reason, tourismus damp store does not automatically append the "-p[id]" on the node.url value
+    const idSuffix = `-p${node.id}`;
+    let url = node.url.replace(/^\/+|\/+$/g, '');
+
+    // Check if the URL already contains the "-p[id]" suffix
+    if (!url.endsWith(idSuffix)) {
+      url += idSuffix;
+    }
+
+    const nodeHandle = encodeURIComponent(url);
 
     let minPrice = 0;
     let maxPrice = 0;
