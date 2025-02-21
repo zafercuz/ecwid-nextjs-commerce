@@ -9,7 +9,7 @@ import {
   EcwidCartItem,
   EcwidCheckout,
   EcwidCurrencyNode,
-  EcwidMedia,
+  EcwidImage,
   EcwidNode,
   EcwidOrder,
   EcwidPagedResult,
@@ -17,7 +17,7 @@ import {
   EcwidProductOption,
   EcwidRelatedProducts,
   EcwidVariation,
-  Image,
+  Media,
   Menu,
   Money,
   Product,
@@ -170,7 +170,7 @@ export async function getStoreCurrencyCode(): Promise<string> {
     return res.body.formatsAndUnits.currency;
 }
 
-const reshapeImage = (img: EcwidMedia): Image => {
+const reshapeImage = (img: EcwidImage): Media => {
     return {
         url: img.url,
         altText: img.name || '',
@@ -345,6 +345,8 @@ const reshapeProduct = (
       url += idSuffix;
     }
 
+    console.log('node', node);
+
     const nodeHandle = encodeURIComponent(url);
 
     let minPrice = 0;
@@ -443,15 +445,30 @@ const reshapeProduct = (
         product.variants = variantsCombinations;
     }
 
-    product.images = [] as EcwidMedia[];
+    product.images = [] as EcwidImage[];
 
-    const media = node.galleryImages as EcwidMedia[];
+    const media = node.galleryImages as EcwidImage[];
     if (media.length > 0) {
         var images = media.map((m) => reshapeImage(m));
         product.images = images;
     }
 
-    product.featuredImage = node.originalImage as EcwidMedia;
+    const videos = node.media.videos;
+    if (Array.isArray(videos) && videos.length > 0 && product.images.length > 0) {
+      videos.forEach((video) => {
+          const matchingImage = product.images.find((image) => image.id === video.videoCoverId);
+          if (matchingImage) {
+              // Assuming you want to append video information to the image
+              matchingImage.video = {
+                  url: video.url,
+                  title: video.title,
+                  description: video.description
+              };
+            }
+        });
+    }
+
+    product.featuredImage = node.originalImage as EcwidImage;
 
     if (product.featuredImage) product.images.unshift(product.featuredImage);
 
