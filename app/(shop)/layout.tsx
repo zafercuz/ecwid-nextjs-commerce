@@ -39,11 +39,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <head>
         <>
           <Script
-            async={true}
-            strategy="beforeInteractive"
-            src={`https://www.googletagmanager.com/gtag/js?id=GTM-PTP34FN8`}
-          />
-          <Script
             id="google-tag-manager"
             strategy="beforeInteractive"
             dangerouslySetInnerHTML={{
