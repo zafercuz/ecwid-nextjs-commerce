@@ -47,12 +47,6 @@ export type Image = {
   altText?: string;
 };
 
-export type Media = Image & {
-  videoUrl?: string;
-  videoTitle?: string;
-  videoProviderName?: string;
-}
-
 export type Menu = {
   title: string;
   path: string;
@@ -126,36 +120,6 @@ export type EcwidElement = {
   properties: { [id: string]: any };
 };
 
-export type EcwidMedia = {
-  images: {
-    id: number;
-    alt?: {
-      main: string;
-    };
-    orderBy: number;
-    isMain: boolean;
-    image160pxUrl: string;
-    image400pxUrl: string;
-    image800pxUrl: string;
-    image1500pxUrl: string;
-    imageOriginalUrl: string;
-    externalId?: string;
-  }[];
-  videos?: {
-    id: string;
-    videoCoverId: string;
-    url: string;
-    embedHtml: string;
-    providerName: string;
-    title: string;
-    image160pxUrl: string;
-    image400pxUrl: string;
-    image800pxUrl: string;
-    image1500pxUrl: string;
-    imageOriginalUrl: string;
-  }[];
-};
-
 export type EcwidNode = EcwidElement & {
   enabled: boolean;
   name: string;
@@ -170,12 +134,11 @@ export type EcwidNode = EcwidElement & {
   compareToPrice: number;
   seoTitle: string;
   seoDescription: string;
-  originalImage: EcwidImage;
-  galleryImages: EcwidImage[];
+  originalImage: EcwidMedia;
+  galleryImages: EcwidMedia[];
   relatedProducts: EcwidRelatedProducts;
   combinations: EcwidVariation[];
   options: EcwidProductOption[];
-  media: EcwidMedia;
 };
 
 export type EcwidRelatedProducts = {
@@ -189,7 +152,7 @@ export type EcwidRelatedCategory = {
   productCount: number;
 };
 
-export type EcwidImage = {
+export type EcwidMedia = {
   id: string;
   name: string;
   mediaType: string;
