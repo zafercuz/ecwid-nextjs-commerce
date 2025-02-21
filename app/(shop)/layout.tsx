@@ -1,7 +1,7 @@
+import { GoogleTagManager } from '@next/third-parties/google';
 import Navbar from 'components/layout/navbar';
 import { GeistSans } from 'geist/font';
 import { ensureStartsWith } from 'lib/utils';
-import Script from 'next/script';
 import { ReactNode, Suspense } from 'react';
 import '../globals.css';
 
@@ -35,8 +35,7 @@ export const metadata = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={GeistSans.variable}>
-      <head>
-        {/* GTM integration script */}
+      {/* <head>
         <>
           <Script
             async={true}
@@ -62,22 +61,24 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             }}
           />
         </>
-      </head>
+      </head> */}
       <body className="bg-neutral-50 text-black selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white">
         {/* GTM noscript fallback */}
-        <noscript>
+        {/* <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-PTP34FN8"
             height="0"
             width="0"
             style={{ display: 'none', visibility: 'hidden' }}
           ></iframe>
-        </noscript>
+        </noscript> */}
         <Navbar />
         <Suspense>
           <main>{children}</main>
         </Suspense>
       </body>
+
+      <GoogleTagManager gtmId="GTM-PTP34FN8" />
     </html>
   );
 }
